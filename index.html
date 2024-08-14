@@ -1,0 +1,141 @@
+<HTML>
+<BODY>
+<div id="main">
+  <DIV class="trig">
+  </DIV>
+</div>
+<STYLE>
+.trig {
+    position: absolute;
+    top: 200;
+    left: 200;
+    width: 0px;
+    height: 0px;
+    border: solid;
+    border-right: 50px solid transparent;
+    border-left: 50px solid transparent;
+    border-top: 50px solid transparent;
+    border-bottom: 50px solid teal;
+}
+</STYLE>
+<script>
+
+let parent = document.getElementById('main');
+let tris = [];
+let counter =0;
+<!-- setInterval(() => { -->
+  <!-- let elm = document.createElement('div'); -->
+  <!-- elm.className='trig'; -->
+  <!-- elm.style=`top: ${Math.random()*600}; left: ${Math.random()*600}; border-bottom: 50 solid #${Math.random()*100}`; -->
+  <!-- tris.push(elm); -->
+  <!-- parent.appendChild(elm) -->
+<!-- }, 100) -->
+
+class vector {
+  constructor(x, y) {
+    this.x = x;
+    this.y = y;
+  }
+  normalize() {
+    this.magnitude = Math.sqrt(this.x*this.x + this.y*this.y)
+    this.x /= this.magnitude;
+    this.y /= this.magnitude;
+  }
+}
+
+class triangle {
+  constructor(t1, t2, t3) {
+    this.t1= t1;
+    this.t2= t2;
+    this.t3= t3;
+  }
+}
+
+class vertex {
+  constructor(x, y, angle) {
+    this.x = x;
+    this.y = y;
+    this.angle  = angle;
+  }
+}
+
+let draw = (x, y, color) => {
+  let elm = document.createElement('div');
+  elm.className='trig';
+  elm.style=`top: ${y}; left: ${x}; border: solid ${color};`;
+  parent.appendChild(elm)
+}
+
+let p1x=130;
+let p1y=130;
+
+let p2x=30;
+let p2y=130;
+
+let p3x=200;
+let p3y=530;
+draw(p1x, p1y, 'pink')
+draw(p2x, p2y, 'red')
+draw(p3x, p3y, 'blue')
+
+let v1 = new vector(p1x-p2x, p1y-p2y);
+let v2 = new vector(p3x-p2x, p3y-p2y);
+let v3 = new vector(p1x-p3x, p1y-p3y);
+
+v1.normalize();
+v2.normalize();
+v3.normalize();
+
+let angle = Math.acos((v1.x*v2.x)+(v1.y*v2.y));
+let angle2 = Math.acos((v1.x*v3.x)+(v1.y*v3.y));
+angle = angle*180/Math.PI;
+angle2 = angle2*180/Math.PI;
+let angle3 = 180 - angle - angle2;
+
+console.log(angle)
+console.log(angle2)
+console.log(angle3)
+
+let t1 = new vertex(p1x, p1y, angle2);
+let t2 = new vertex(p2x, p2y, angle);
+let t3 = new vertex(p3x, p3y, angle3);
+
+let tg;
+
+if(t1.angle >= t2.angle && t1.angle >= t3.angle) {
+  tg = new triangle(t1, t2, t3);
+}
+if(t2.angle >= t1.angle && t2.angle >= t3.angle) {
+  tg = new triangle(t2, t1, t3);
+}
+if(t3.angle >= t1.angle && t1.angle >= t2.angle) {
+  tg = new triangle(t3, t2, t1);
+}
+console.log(tg)
+
+let distbase = Math.sqrt(Math.pow((tg.t2.x - tg.t3.x), 2) + Math.pow((tg.t2.y - tg.t3.y), 2));
+let distup =   Math.sqrt(Math.pow((tg.t2.x - tg.t1.x), 2) + Math.pow((tg.t2.y - tg.t1.y), 2));
+
+let npx = -Math.cos(tg.t2.angle *Math.PI/ 180) * distup + tg.t1.x
+let npy = Math.sin(tg.t2.angle*Math.PI/ 180) * distup + tg.t1.y
+draw(npx, npy, 'black')
+draw(npx+distbase, npy, 'black')
+
+
+// elm
+y=document.getElementsByClassName('trig')[0]
+y.style.top = tg.t1.y;
+y.style.left = tg.t1.x;
+y.style['border-bottom'] = `${npy-tg.t1.y}px solid pink`
+y.style['border-left'] = `${tg.t1.x -npx}px solid transparent`
+y.style['border-right'] = `${-tg.t1.x + npx + distbase}px solid transparent`
+setInterval(() => {
+  tris.forEach((elm) => {
+    num = Number.parseInt(elm.style.top.substr(0, elm.style.top.length-2));
+    elm.style.top = num+1;
+  });
+}, 1000/120)
+
+</script>
+</BODY>
+</HTML>
