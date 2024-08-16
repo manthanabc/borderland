@@ -38,8 +38,11 @@ class vector {
   }
   normalize() {
     this.magnitude = Math.sqrt(this.x*this.x + this.y*this.y)
+    console.log("divided by")
+    console.log(this.magnitude)
     this.x /= this.magnitude;
     this.y /= this.magnitude;
+    console.log(this)
   }
 }
 
@@ -66,14 +69,14 @@ let draw = (x, y, color) => {
   parent.appendChild(elm)
 }
 
-let p1x=130;
-let p1y=130;
+let p1x=340;
+let p1y=290;
 
-let p2x=30;
-let p2y=130;
+let p2x=130;
+let p2y=190;
 
 let p3x=200;
-let p3y=530;
+let p3y=170;
 draw(p1x, p1y, 'pink')
 draw(p2x, p2y, 'red')
 draw(p3x, p3y, 'blue')
@@ -95,7 +98,6 @@ let angle3 = 180 - angle - angle2;
 console.log(angle)
 console.log(angle2)
 console.log(angle3)
-
 let t1 = new vertex(p1x, p1y, angle2);
 let t2 = new vertex(p2x, p2y, angle);
 let t3 = new vertex(p3x, p3y, angle3);
@@ -105,10 +107,10 @@ let tg;
 if(t1.angle >= t2.angle && t1.angle >= t3.angle) {
   tg = new triangle(t1, t2, t3);
 }
-if(t2.angle >= t1.angle && t2.angle >= t3.angle) {
+else if(t2.angle >= t1.angle && t2.angle >= t3.angle) {
   tg = new triangle(t2, t1, t3);
 }
-if(t3.angle >= t1.angle && t1.angle >= t2.angle) {
+else if(t3.angle >= t1.angle && t3.angle >= t2.angle) {
   tg = new triangle(t3, t2, t1);
 }
 console.log(tg)
@@ -122,13 +124,31 @@ draw(npx, npy, 'black')
 draw(npx+distbase, npy, 'black')
 
 
+let borderBottom = npy-tg.t1.y
+let borderLeft = tg.t1.x -npx
+let borderRight = -tg.t1.x + npx + distbase
 // elm
 y=document.getElementsByClassName('trig')[0]
 y.style.top = tg.t1.y;
 y.style.left = tg.t1.x;
-y.style['border-bottom'] = `${npy-tg.t1.y}px solid pink`
-y.style['border-left'] = `${tg.t1.x -npx}px solid transparent`
-y.style['border-right'] = `${-tg.t1.x + npx + distbase}px solid transparent`
+y.style['border-bottom'] = `${borderBottom}px solid pink`
+y.style['border-left'] = `${borderLeft}px solid transparent`
+y.style['border-right'] = `${borderRight}px solid transparent`
+y.style['border-top'] = `0px solid transparent`
+
+let baseangle = 90 - Math.atan( (tg.t2.x - tg.t3.x)/(tg.t2.y - tg.t3.y) ) * 180/Math.PI;
+console.log(tg.t2.x)
+<!-- y.style['rotate'] = `${baseangle}deg` -->
+
+let rotx = tg.t1.x - borderLeft + (borderLeft + borderRight)/2;
+let roty = tg.t1.y + borderBottom/2;
+<!-- y.style['transform'] = `translateX(-${borderLeft}px) rotate(${0}deg)`; -->
+
+draw(rotx, roty, "yellow")
+console.log(tg.t1.y - roty)
+y.style['transform'] = `translateX(-${borderLeft}px) translate(${tg.t1.x-rotx}px, -${ borderBottom/2 }px) rotate(${baseangle}deg) translate(${-tg.t1.x+rotx}px, ${ borderBottom/2 }px)`;
+<!-- y.style['transform'] = `translateX(-${borderLeft}px) rotate(${0}deg)`; -->
+
 setInterval(() => {
   tris.forEach((elm) => {
     num = Number.parseInt(elm.style.top.substr(0, elm.style.top.length-2));
