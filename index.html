@@ -38,11 +38,11 @@ class vector {
   }
   normalize() {
     this.magnitude = Math.sqrt(this.x*this.x + this.y*this.y)
-    console.log("divided by")
-    console.log(this.magnitude)
+    <!-- console.log("divided by") -->
+    <!-- console.log(this.magnitude) -->
     this.x /= this.magnitude;
     this.y /= this.magnitude;
-    console.log(this)
+    <!-- console.log(this) -->
   }
 }
 
@@ -63,98 +63,150 @@ class vertex {
 }
 
 let draw = (x, y, color) => {
-  let elm = document.createElement('div');
-  elm.className='trig';
-  elm.style=`top: ${y}; left: ${x}; border: solid ${color};`;
-  parent.appendChild(elm)
+  <!-- let elm = document.createElement('div'); -->
+  <!-- elm.className='trig'; -->
+  <!-- elm.style=`top: ${y}; left: ${x}; border: solid ${color};`; -->
+  <!-- parent.appendChild(elm) -->
 }
 
-let p1x=340;
-let p1y=290;
+let dist = (x1, y1, x2, y2) => {
+  return Math.sqrt(Math.pow(x1-x2, 2) + Math.pow(y1-y2, 2));
+}
 
-let p2x=130;
-let p2y=190;
+let p1x=420;
+let p1y=590;
 
-let p3x=200;
-let p3y=170;
+let p2x=330;
+let p2y=180;
+
+let p3x=550;
+let p3y=470;
+
+
 draw(p1x, p1y, 'pink')
-draw(p2x, p2y, 'red')
+<!-- draw(p2x, p2y, 'red') -->
 draw(p3x, p3y, 'blue')
 
-let v1 = new vector(p1x-p2x, p1y-p2y);
-let v2 = new vector(p3x-p2x, p3y-p2y);
-let v3 = new vector(p1x-p3x, p1y-p3y);
 
-v1.normalize();
-v2.normalize();
-v3.normalize();
+let compute =() => {
+  let v1 = new vector(p1x-p2x, p1y-p2y);
+  let v2 = new vector(p3x-p2x, p3y-p2y);
+  let v3 = new vector(p1x-p3x, p1y-p3y);
 
-let angle = Math.acos((v1.x*v2.x)+(v1.y*v2.y));
-let angle2 = Math.acos((v1.x*v3.x)+(v1.y*v3.y));
-angle = angle*180/Math.PI;
-angle2 = angle2*180/Math.PI;
-let angle3 = 180 - angle - angle2;
+  v1.normalize(); v2.normalize(); v3.normalize();
 
-console.log(angle)
-console.log(angle2)
-console.log(angle3)
-let t1 = new vertex(p1x, p1y, angle2);
-let t2 = new vertex(p2x, p2y, angle);
-let t3 = new vertex(p3x, p3y, angle3);
+  let angle = Math.acos((v1.x*v2.x)+(v1.y*v2.y));
+  let angle2 = Math.acos((v1.x*v3.x)+(v1.y*v3.y));
+  angle = angle*180/Math.PI;
+  angle2 = angle2*180/Math.PI;
+  let angle3 = 180 - angle - angle2;
 
-let tg;
+  let t1 = new vertex(p1x, p1y, angle2);
+  let t2 = new vertex(p2x, p2y, angle);
+  let t3 = new vertex(p3x, p3y, angle3);
 
-if(t1.angle >= t2.angle && t1.angle >= t3.angle) {
-  tg = new triangle(t1, t2, t3);
+  let tg;
+
+  if(t1.angle >= t2.angle && t1.angle >= t3.angle) {
+    <!-- if(t2.x > t3.x) { -->
+      tg = new triangle(t1, t3, t2);
+    <!-- } else { -->
+      <!-- tg = new triangle(t1, t2, t3); -->
+    <!-- } -->
+  }
+  else if(t2.angle >= t1.angle && t2.angle >= t3.angle) {
+    <!-- if(t1.x > t3.x) { -->
+      tg = new triangle(t2, t3, t1); 
+    <!-- } else { --> 
+     <!-- tg = new triangle(t2, t1, t3); --> 
+    <!-- } -->
+  }
+  else if(t3.angle >= t1.angle && t3.angle >= t2.angle) {
+    <!-- if(t2.x > t1.x) { -->
+     tg = new triangle(t3, t1, t2); 
+    <!-- } else { --> 
+     <!-- tg = new triangle(t3, t2, t1); --> 
+    <!-- } -->
+  }
+  <!-- console.log(tg) -->
+
+  let distbase = dist(tg.t2.x, tg.t2.y, tg.t3.x, tg.t3.y); 
+
+
+  let sign = (tg.t2.x - tg.t1.x) * (tg.t3.y - tg.t1.y) - (tg.t3.x - tg.t1.x) * (tg.t2.y - tg.t1.y);
+  if(sign<0) { sign = -1 } else { sign=1 }
+  <!-- console.log(sign) -->
+  
+  // TODO: Somehow choose the rightmost point correctly its either t2 or t3
+  
+  let distup, npx, npy
+  if(sign < 0) {
+    distup =   dist(tg.t2.x, tg.t2.y, tg.t1.x, tg.t1.y); 
+    npx = -Math.cos(tg.t2.angle *Math.PI/ 180) * distup + tg.t1.x
+    npy = Math.sin(tg.t2.angle*Math.PI/ 180) * distup + tg.t1.y
+  } else {
+    distup =   dist(tg.t3.x, tg.t3.y, tg.t1.x, tg.t1.y); 
+    npx = -Math.cos(tg.t3.angle *Math.PI/ 180) * distup + tg.t1.x
+    npy = Math.sin(tg.t3.angle*Math.PI/ 180) * distup + tg.t1.y
+  }
+  // the rest will work fine
+
+  //npx is the down left most arrow of the triangle
+
+  draw(npx, npy, 'orange')
+  draw(npx+distbase, npy, 'black')
+
+
+  let borderBottom = npy-tg.t1.y
+  let borderLeft = tg.t1.x -npx
+  let borderRight = -tg.t1.x + npx + distbase
+  // elm
+  y=document.getElementsByClassName('trig')[0]
+  y.style.top = tg.t1.y;
+  y.style.left = tg.t1.x;
+  y.style['border-bottom'] = `${borderBottom}px solid pink`
+  y.style['border-left'] = `${borderLeft}px solid transparent`
+  y.style['border-right'] = `${borderRight}px solid transparent`
+  y.style['border-top'] = `0px solid transparent`
+
+
+
+  let baseangle = 90 - Math.atan( (tg.t2.x - tg.t3.x)/(tg.t2.y - tg.t3.y) ) * 180/Math.PI;
+  <!-- let baseangle =90- Math.atan( (p2x - p3x)/(p2y - p3y) ) * 180/Math.PI; -->
+  <!-- console.log(tg.t2.x) -->
+  if(tg.t2.y<tg.t3.y) baseangle+=180
+  baseangle = 360-baseangle
+  console.log(baseangle)
+
+  <!-- if(sign > 0 ) {console.log("Noe")} -->
+  baseangle += (sign < 0)? 180 : 0; 
+
+  let rotx = tg.t1.x - borderLeft + (borderLeft + borderRight)/2;
+  let roty = tg.t1.y + borderBottom/2;
+
+  baseangle *=-1
+  <!-- console.log(baseangle, sign) -->
+  <!-- draw(rotx, roty, "yellow") -->
+  <!-- console.log(tg.t1.y - roty) -->
+  y.style['transform'] = `translateX(-${borderLeft}px) translate(${tg.t1.x-rotx}px, -${ borderBottom/2 }px) rotate(${baseangle}deg) translate(${-tg.t1.x+rotx}px, ${ borderBottom/2 }px)`;
 }
-else if(t2.angle >= t1.angle && t2.angle >= t3.angle) {
-  tg = new triangle(t2, t1, t3);
-}
-else if(t3.angle >= t1.angle && t3.angle >= t2.angle) {
-  tg = new triangle(t3, t2, t1);
-}
-console.log(tg)
-
-let distbase = Math.sqrt(Math.pow((tg.t2.x - tg.t3.x), 2) + Math.pow((tg.t2.y - tg.t3.y), 2));
-let distup =   Math.sqrt(Math.pow((tg.t2.x - tg.t1.x), 2) + Math.pow((tg.t2.y - tg.t1.y), 2));
-
-let npx = -Math.cos(tg.t2.angle *Math.PI/ 180) * distup + tg.t1.x
-let npy = Math.sin(tg.t2.angle*Math.PI/ 180) * distup + tg.t1.y
-draw(npx, npy, 'black')
-draw(npx+distbase, npy, 'black')
-
-
-let borderBottom = npy-tg.t1.y
-let borderLeft = tg.t1.x -npx
-let borderRight = -tg.t1.x + npx + distbase
-// elm
-y=document.getElementsByClassName('trig')[0]
-y.style.top = tg.t1.y;
-y.style.left = tg.t1.x;
-y.style['border-bottom'] = `${borderBottom}px solid pink`
-y.style['border-left'] = `${borderLeft}px solid transparent`
-y.style['border-right'] = `${borderRight}px solid transparent`
-y.style['border-top'] = `0px solid transparent`
-
-let baseangle = 90 - Math.atan( (tg.t2.x - tg.t3.x)/(tg.t2.y - tg.t3.y) ) * 180/Math.PI;
-console.log(tg.t2.x)
-<!-- y.style['rotate'] = `${baseangle}deg` -->
-
-let rotx = tg.t1.x - borderLeft + (borderLeft + borderRight)/2;
-let roty = tg.t1.y + borderBottom/2;
-<!-- y.style['transform'] = `translateX(-${borderLeft}px) rotate(${0}deg)`; -->
-
-draw(rotx, roty, "yellow")
-console.log(tg.t1.y - roty)
-y.style['transform'] = `translateX(-${borderLeft}px) translate(${tg.t1.x-rotx}px, -${ borderBottom/2 }px) rotate(${baseangle}deg) translate(${-tg.t1.x+rotx}px, ${ borderBottom/2 }px)`;
-<!-- y.style['transform'] = `translateX(-${borderLeft}px) rotate(${0}deg)`; -->
-
 setInterval(() => {
   tris.forEach((elm) => {
     num = Number.parseInt(elm.style.top.substr(0, elm.style.top.length-2));
     elm.style.top = num+1;
   });
 }, 1000/120)
+
+document.onmousemove = handleMouseMove;
+function handleMouseMove(event) {
+    var eventDoc, doc, body;
+    <!-- console.log(event.pageX + ' ' + event.pageY) -->
+    p2x = event.pageX;
+    p2y = event.pageY;
+    <!-- if(Math.random() > 0.1) { -->
+      compute();
+    <!-- } -->
+}
 
 </script>
 </BODY>
