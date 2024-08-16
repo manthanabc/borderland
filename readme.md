@@ -1,4 +1,3 @@
 # spinny cube using css borders
-
-css borders can be used to draw shapes by makign one or more boders transparent (border-left: 50px solid transparent) one of those shapes is triangle using transform and rotate property you could create any possible triangle so all we need to create 3d scene was some math and trignometry
-
+[demo](https://manthanabc.github.io/borderland/)
+CSS borders can be used to draw shapes by making one or more borders transparent (e.g., border-left: 50px solid transparent). One such shape is the triangle. By using the transform and rotate properties, you can create various triangles. To build a 3D scene, you just need some math and trigonometry.
