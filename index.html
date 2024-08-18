@@ -42,14 +42,15 @@ class triangle {
   }
 }
 
-let convert2d = (p1) => {
-  let a = rotate(p1)
-  p2 = new Point2d(a[0]*20 + 500, a[1]*20 + 500);
-  let sf = Math.pow(a[2]+15, 0.2+0.0001)
-  p2.x /= sf;
-  p2.y /= sf;
-  p2.x += 0.1;
-  return p2;
+let convert2d = ([ox, oy, oz]) => {
+  <!-- let [x, y ,z] = rotate([ox, oy, oz]) -->
+  <!-- return [ox + 10, oy + 10, oz + 10] -->
+  let [x, y, z] = rotate([ox, oy, oz])
+  let sf = Math.pow(z + 15, 0.2 + 0.0001)
+  <!-- p2 = new Point2d(x * 20 + 500, y * 20 + 500); -->
+  <!-- p2.x /= sf; -->
+  <!-- p2.y /= sf; -->
+  return [(x*20+500)/sf, (y*20+500)/sf];
 }
 
 rotate = (p) => {
@@ -59,9 +60,9 @@ rotate = (p) => {
     let s = Math.sin(angle_rad);
     let c =Math.cos(angle_rad);
     <!-- z -= 100; -->
-    a[0] = p.x * c - p.z * s;
-    a[1] = p.y ;
-    a[2] = p.x * s + p.z * c;
+    a[0] = p[0] * c - p[2] * s;
+    a[1] = p[1] ;
+    a[2] = p[0] * s + p[2] * c;
     return a;
 }
 
@@ -78,15 +79,31 @@ class rendertrig {
     parent.appendChild(elm);
     this.elm = elm
     this.color = '#30'+(Math.random() * 0xFFFF << 0).toString(16).padStart(4, '0') + '80';
+    let p1 =convert2d(this.p1);
+    let p2 =convert2d(this.p2);
+    let p3 =convert2d(this.p3);
+    
+    this.v1 = new vector(p1[0]-p2[0], p1[1]-p2[1]);
+    this.v2 = new vector(p3[0]-p2[0], p3[1]-p2[1]);
+    this.v3 = new vector(p1[0]-p3[0], p1[1]-p3[1]);
   }
   draw() {
     let p1 =convert2d(this.p1);
     let p2 =convert2d(this.p2);
     let p3 =convert2d(this.p3);
-    
-    let v1 = new vector(p1.x-p2.x, p1.y-p2.y);
-    let v2 = new vector(p3.x-p2.x, p3.y-p2.y);
-    let v3 = new vector(p1.x-p3.x, p1.y-p3.y);
+
+    this.v1.x = p1[0]-p2[0];
+    this.v1.y = p1[1]-p2[1];
+
+    this.v2.x = p3[0]-p2[0];
+    this.v2.y = p3[1]-p2[1];
+
+    this.v3.x = p1[0]-p3[0];
+    this.v3.y = p1[1]-p3[1];
+
+    let v1 = this.v1;
+    let v2 = this.v2;
+    let v3 = this.v3;
 
     v1.normalize(); v2.normalize(); v3.normalize();
 
@@ -97,9 +114,9 @@ class rendertrig {
     angle2 = angle2 * (180/Math.PI);
     let angle3 = 180 - angle - angle2;
 
-    let t1 = new vertex(p1.x, p1.y, p1.z, angle2);
-    let t2 = new vertex(p2.x, p2.y, p1.z, angle);
-    let t3 = new vertex(p3.x, p3.y, p1.z, angle3);
+    let t1 = new vertex(p1[0], p1[1], p1[2], angle2);
+    let t2 = new vertex(p2[0], p2[1], p1[2], angle);
+    let t3 = new vertex(p3[0], p3[1], p1[2], angle3);
 
     let tg;
 
@@ -110,7 +127,7 @@ class rendertrig {
         tg = new triangle(t2, t3, t1); 
     }
     else if(t3.angle >= t1.angle && t3.angle >= t2.angle) {
-       tg = new triangle(t3, t1, t2); 
+         tg = new triangle(t3, t1, t2); 
     }
   
     let y=this.elm//document.getElementsByClassName('trig')[0]
@@ -183,67 +200,53 @@ let dist = (x1, y1, x2, y2) => {
 
 let angle = 45;
 
-class Point2d {
-  constructor(x, y) {
-    this.x  = x;
-    this.y  = y;
-  }
-}
-
-class Point3d {
-  constructor(x, y, z) {
-    this.x = x;
-    this.y = y; 
-    this.z = z;
-  }
-}
 
 let cube = []
 let makecube = () => {
       
       cube.push(new rendertrig(
-          new Point3d(-5, -5, -5), 
-          new Point3d(5, -5, -5), 
-          new Point3d(5, 5, -5)
+         [ -5, -5, -5], 
+         [ 5, -5, -5], 
+         [ 5, 5, -5]
       ));
       cube.push(new rendertrig(
-          new Point3d(-5, 5, -5), 
-          new Point3d(-5, -5, -5), 
-          new Point3d(5, 5, -5)
+         [ -5, 5, -5], 
+         [ -5, -5, -5], 
+         [ 5, 5, -5]
       ));
 
       // Define vertices in the z = 5 plane
       cube.push(new rendertrig(
-          new Point3d(-5, -5, 5), 
-          new Point3d(5, -5, 5), 
-          new Point3d(5, 5, 5)
+         [ -5, -5, 5], 
+         [ 5, -5, 5], 
+         [ 5, 5, 5]
       ));
       cube.push(new rendertrig(
-          new Point3d(-5, 5, 5), 
-          new Point3d(-5, -5, 5), 
-          new Point3d(5, 5, 5)
+         [ -5, 5, 5], 
+         [ -5, -5, 5], 
+         [ 5, 5, 5]
       ));
 
       // Define vertical edges connecting the top and bottom faces
       cube.push(new rendertrig(
-          new Point3d(-5, -5, -5), 
-          new Point3d(-5, -5, 5), 
-          new Point3d(-5, 5, 5)
+         [ -5, -5, -5], 
+         [ -5, -5, 5], 
+         [ -5, 5, 5]
       ));
       cube.push(new rendertrig(
-          new Point3d(-5, 5, -5), 
-          new Point3d(-5, -5, -5), 
-          new Point3d(-5, 5, 5)
+         [ -5, 5, -5], 
+         [ -5, -5, -5], 
+         [ -5, 5, 5]
       ));
       cube.push(new rendertrig(
-          new Point3d(5, -5, -5), 
-          new Point3d(5, -5, 5), 
-          new Point3d(5, 5, 5)
+         [ 5, -5, -5], 
+         [ 5, -5, 5], 
+         [ 5, 5, 5]
       ));
       cube.push(new rendertrig(
-          new Point3d(5, 5, -5), 
-          new Point3d(5, -5, -5), 
-          new Point3d(5, 5, 5)
+         [ 5, 5, -5], 
+         [ 5, -5, -5], 
+         [ 5, 5, 5]
       ));
 }
 
@@ -259,7 +262,7 @@ let renderCube = () => {
   })
 }
 
-
+renderCube()
 document.onmousemove = handleMouseMove;
 function handleMouseMove(event) {
     if(Math.random() > 0.05) {
