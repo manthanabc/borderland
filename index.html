@@ -16,7 +16,9 @@
     border-bottom: 50px solid teal;
 }
 </style>
-<script>
+<script type='module'>
+
+import OBJFile from './objparser.js'
 
 let parent = document.getElementById('main');
 let tris = [];
@@ -42,29 +44,30 @@ class triangle {
   }
 }
 
-let convert2d = ([ox, oy, oz]) => {
-  <!-- let [x, y ,z] = rotate([ox, oy, oz]) -->
-  <!-- return [ox + 10, oy + 10, oz + 10] -->
-  let [x, y, z] = rotate([ox, oy, oz])
-  let sf = Math.pow(z + 15, 0.2 + 0.0001)
-  <!-- p2 = new Point2d(x * 20 + 500, y * 20 + 500); -->
-  <!-- p2.x /= sf; -->
-  <!-- p2.y /= sf; -->
-  return [(x*20+500)/sf, (y*20+500)/sf];
-}
-
-rotate = (p) => {
+let rotate = (p) => {
     let angle_rad = angle * Math.PI / 180.0; 
-    <!-- angle_rad = 0; -->
+    // angle_rad = 0; 
     let a = [0, 0, 0 ]
     let s = Math.sin(angle_rad);
     let c =Math.cos(angle_rad);
-    <!-- z -= 100; -->
+    // z -= 100; 
     a[0] = p[0] * c - p[2] * s;
     a[1] = p[1] ;
     a[2] = p[0] * s + p[2] * c;
     return a;
 }
+
+let convert2d = ([ox, oy, oz]) => {
+  // let [x, y ,z] = rotate([ox, oy, oz])
+  // return [ox + 10, oy + 10, oz + 10] 
+  let [x, y, z] = rotate([ox, oy, oz])
+  let sf = Math.max(Math.pow(z + 20, 0.3 + 0.01), 1);
+  // p2 = new Point2d(x * 20 + 500, y * 20 + 500); 
+  // p2.x /= sf; 
+  // p2.y /= sf; 
+  return [(x/sf*20+500), ((y+30)/sf*20+500)];
+}
+
 
 class rendertrig {
   constructor(p1, p2, p3) {
@@ -130,7 +133,7 @@ class rendertrig {
          tg = new triangle(t3, t1, t2); 
     }
   
-    let y=this.elm//document.getElementsByClassName('trig')[0]
+    let y=this.elm // document.getElementsByClassName('trig')[0]
     let distbase = dist(tg.t2.x, tg.t2.y, tg.t3.x, tg.t3.y); 
 
     let sign = (tg.t2.x - tg.t1.x) * (tg.t3.y - tg.t1.y) - (tg.t3.x - tg.t1.x) * (tg.t2.y - tg.t1.y);
@@ -201,74 +204,55 @@ let dist = (x1, y1, x2, y2) => {
 let angle = 45;
 
 
-let cube = []
-let makecube = () => {
-      
-      cube.push(new rendertrig(
-         [ -5, -5, -5], 
-         [ 5, -5, -5], 
-         [ 5, 5, -5]
-      ));
-      cube.push(new rendertrig(
-         [ -5, 5, -5], 
-         [ -5, -5, -5], 
-         [ 5, 5, -5]
-      ));
+let faces = []
 
-      // Define vertices in the z = 5 plane
-      cube.push(new rendertrig(
-         [ -5, -5, 5], 
-         [ 5, -5, 5], 
-         [ 5, 5, 5]
-      ));
-      cube.push(new rendertrig(
-         [ -5, 5, 5], 
-         [ -5, -5, 5], 
-         [ 5, 5, 5]
-      ));
+let t = await fetch('./teapot.obj')
+let tex = await t.text();
 
-      // Define vertical edges connecting the top and bottom faces
-      cube.push(new rendertrig(
-         [ -5, -5, -5], 
-         [ -5, -5, 5], 
-         [ -5, 5, 5]
-      ));
-      cube.push(new rendertrig(
-         [ -5, 5, -5], 
-         [ -5, -5, -5], 
-         [ -5, 5, 5]
-      ));
-      cube.push(new rendertrig(
-         [ 5, -5, -5], 
-         [ 5, -5, 5], 
-         [ 5, 5, 5]
-      ));
-      cube.push(new rendertrig(
-         [ 5, 5, -5], 
-         [ 5, -5, -5], 
-         [ 5, 5, 5]
-      ));
-}
 
-for(let i=0; i<200; i++) {
-  makecube();
-}
-cube.forEach((trig) => {
+const objFile = new OBJFile(tex);
+const output = objFile.parse(); // see description below
+
+
+let model = output.models[0];
+let Obj_faces = model.faces;
+let vertices = model.vertices;
+
+console.log(vertices.length)
+console.log(Obj_faces.length)
+
+Obj_faces.forEach((face) => {
+  let tex = vertices[face.vertices[0].vertexIndex -1]
+  let t1 = [tex.x*5 , -tex.y*5 , tex.z*5 ];
+  tex = vertices[face.vertices[1].vertexIndex -1]
+  let t2 = [tex.x*5 , -tex.y*5 , tex.z*5 ];
+  tex = vertices[face.vertices[2].vertexIndex -1]
+  let t3 = [tex.x*5 , -tex.y*5 , tex.z*5 ];
+
+  faces.push(new rendertrig(
+    t1, t2, t3
+  ))
+})
+
+faces.forEach((trig) => {
   trig.init();
 })
 let renderCube = () => {
-  cube.forEach((trig) => {
+  faces.forEach((trig) => {
     trig.draw();
   })
 }
 
 renderCube()
-document.onmousemove = handleMouseMove;
+
+window.setInterval(() => {
+  angle += 1;
+  renderCube();
+}, 50)
+
+// document.onmousemove = handleMouseMove;
 function handleMouseMove(event) {
-    if(Math.random() > 0.05) {
-      var eventDoc, doc, body;
-      p2x = event.pageX;
-      p2y = event.pageY;
+    if(Math.random() > 0.1) {
       angle += 1
       renderCube();
     }
