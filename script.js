@@ -43,8 +43,8 @@ let convert2d = ([ox, oy, oz]) => {
   let [x, y, z] = rotate([ox, oy, oz])
 
   // Subtract camera cordinates
-  z += 20;
-  y += 10;
+  z += 320;
+  y += 15;
 
   let aspect = 1;
   let fovRad = 95 * Math.PI /180;
@@ -70,14 +70,15 @@ let convert2d = ([ox, oy, oz]) => {
 
   x= result[0]/result[3];
   y= result[1]/result[3];
-
+  z = result[2]
   // Convert to screen space cordinates
   x *= 400;
   y *= -400;
   
   x += 450;
   y += 450;
-  return [x, y]
+
+  return [x, y, z]
 }
 
 
@@ -93,7 +94,7 @@ class rendertrig {
     elm.style=`top: ${Math.random()*600}; left: ${Math.random()*600}; border-color:#${Math.random()*100}`;
     parent.appendChild(elm);
     this.elm = elm
-    this.color = '#30'+(Math.random() * 0xFFFF << 0).toString(16).padStart(4, '0') + '80';
+    this.color = '#30'+(Math.random() * 0xFFFF << 0).toString(16).padStart(4, '0') + 'ff';
     let p1 =convert2d(this.p1);
     let p2 =convert2d(this.p2);
     let p3 =convert2d(this.p3);
@@ -122,10 +123,17 @@ class rendertrig {
 
     v1.normalize(); v2.normalize(); v3.normalize();
 
-    let angle = Math.acos((v1.x*v2.x)+(v1.y*v2.y));
-    let angle2 = Math.acos((v1.x*v3.x)+(v1.y*v3.y));
+
+    let clip = (n) => {
+      if(n > 1) return 1;
+      if(n < -1) return -1;
+      return n
+    }
+
+    let angle  = Math.acos(clip((v1.x*v2.x)+(v1.y*v2.y), 1));
+    let angle2 = Math.acos(clip((v1.x*v3.x)+(v1.y*v3.y), 1));
   
-    angle = angle * (180/Math.PI);
+    angle  = angle  * (180/Math.PI);
     angle2 = angle2 * (180/Math.PI);
     let angle3 = 180 - angle - angle2;
 
@@ -174,6 +182,8 @@ class rendertrig {
     y.style['border-left'] = `${borderLeft}px solid transparent`
     y.style['border-right'] = `${borderRight}px solid transparent`
     y.style['border-top'] = `0px solid transparent`
+    y.style['z-index'] = `${~~p1[2]}`
+    // console.log(~~p1[2])
 
 
     let baseangle = 90 - Math.atan( (tg.t2.x - tg.t3.x)/(tg.t2.y - tg.t3.y) ) * 180/Math.PI;
@@ -215,12 +225,12 @@ let dist = (x1, y1, x2, y2) => {
   return Math.sqrt(Math.pow(x1-x2, 2) + Math.pow(y1-y2, 2));
 }
 
-let angle = 60;
+let angle = 0;
 
 
 let faces = []
 
-let t = await fetch('./teapot.obj')
+let t = await fetch('./models/car2/car2.obj')
 let tex = await t.text();
 
 const fileContents =
@@ -237,10 +247,13 @@ let model = output.models[0];
 let Obj_faces = model.faces;
 let vertices = model.vertices;
 
+console.log(model)
+// debug()
+
 console.log(vertices.length)
 console.log(Obj_faces.length)
 
-let scale = 4;
+let scale = 10;
 
 Obj_faces.forEach((face) => {
   let tex = vertices[face.vertices[0].vertexIndex -1]
