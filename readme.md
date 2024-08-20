@@ -1,6 +1,8 @@
 # spinny 3d objects using css borders
 utah teapot \
 ![](https://github.com/manthanabc/borderland/blob/main/video/teapot.gif) \
+w pong lighting
+![](https://github.com/manthanabc/borderland/blob/main/video/shading.gif) \
 teddwy bear \
 ![](https://github.com/manthanabc/borderland/blob/main/video/teddy.gif) \
 [try it](https://manthanabc.github.io/borderland/) \
