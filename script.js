@@ -44,7 +44,7 @@ let convert2d = ([ox, oy, oz]) => {
 
   // Subtract camera cordinates
   z += 320;
-  y += 15;
+  y += 195;
 
   let aspect = 1;
   let fovRad = 95 * Math.PI /180;
@@ -110,12 +110,15 @@ class rendertrig {
 
     this.v1.x = p1[0]-p2[0];
     this.v1.y = p1[1]-p2[1];
+    this.v1.z = p1[2]-p2[2];
 
     this.v2.x = p3[0]-p2[0];
     this.v2.y = p3[1]-p2[1];
+    this.v2.z = p3[2]-p2[2];
 
     this.v3.x = p1[0]-p3[0];
     this.v3.y = p1[1]-p3[1];
+    this.v3.z = p1[2]-p3[2];
 
     let v1 = this.v1;
     let v2 = this.v2;
@@ -198,6 +201,12 @@ class rendertrig {
     baseangle *=-1
     y.className = 'trig'
     y.style['transform'] = `translateX(-${borderLeft}px) translate(${tg.t1.x-rotx}px, -${ borderBottom/2 }px) rotate(${baseangle}deg) translate(${-tg.t1.x+rotx}px, ${ borderBottom/2 }px)`;
+    
+    let t = v1.y * v2.z - v2.y * v1.z;
+    let diffuse=(~~(t*2.5))+60;
+    let specular=(Math.pow(((t)+20)/40, 10))*1000;
+    specular = Math.min(specular, 200)
+    y.style['border-color'] = `rgb(${diffuse + ~~specular}, ${~~specular}, ${~~specular})`
   }
 }
 
@@ -209,8 +218,6 @@ class vertex {
     this.angle  = angle;
   }
 }
-
-
 
 
 // Draw a div at given cordinates for debugging
@@ -225,12 +232,12 @@ let dist = (x1, y1, x2, y2) => {
   return Math.sqrt(Math.pow(x1-x2, 2) + Math.pow(y1-y2, 2));
 }
 
-let angle = 0;
+let angle = 10;
 
 
 let faces = []
 
-let t = await fetch('./models/car2/car2.obj')
+let t = await fetch('./teapot.obj')
 let tex = await t.text();
 
 const fileContents =
@@ -253,7 +260,7 @@ console.log(model)
 console.log(vertices.length)
 console.log(Obj_faces.length)
 
-let scale = 10;
+let scale = 50;
 
 Obj_faces.forEach((face) => {
   let tex = vertices[face.vertices[0].vertexIndex -1]
