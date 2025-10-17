@@ -1,0 +1,184 @@
+/* ImGui-style UI Panel */
+.imgui-panel {
+    position: fixed;
+    top: 10px;
+    right: 10px;
+    width: 300px;
+    background: rgba(30, 30, 30, 0.95);
+    border: 1px solid rgba(100, 100, 100, 0.8);
+    border-radius: 5px;
+    padding: 15px;
+    font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+    color: #e0e0e0;
+    font-size: 13px;
+    z-index: 10000;
+    box-shadow: 0 4px 15px rgba(0, 0, 0, 0.5);
+}
+
+.imgui-header {
+    font-size: 16px;
+    font-weight: bold;
+    margin-bottom: 15px;
+    padding-bottom: 8px;
+    border-bottom: 1px solid rgba(100, 100, 100, 0.5);
+    color: #ffffff;
+}
+
+.imgui-section {
+    margin-bottom: 15px;
+}
+
+.imgui-section-title {
+    font-size: 12px;
+    font-weight: bold;
+    color: #888;
+    text-transform: uppercase;
+    margin-bottom: 8px;
+    letter-spacing: 0.5px;
+}
+
+.imgui-row {
+    margin-bottom: 10px;
+}
+
+.imgui-label {
+    display: block;
+    margin-bottom: 4px;
+    color: #c0c0c0;
+    font-size: 12px;
+}
+
+.imgui-value {
+    float: right;
+    color: #60d0ff;
+    font-weight: bold;
+}
+
+.imgui-slider {
+    width: 100%;
+    height: 4px;
+    -webkit-appearance: none;
+    appearance: none;
+    background: rgba(60, 60, 60, 0.8);
+    outline: none;
+    border-radius: 2px;
+}
+
+.imgui-slider::-webkit-slider-thumb {
+    -webkit-appearance: none;
+    appearance: none;
+    width: 14px;
+    height: 14px;
+    background: #60d0ff;
+    cursor: pointer;
+    border-radius: 50%;
+    border: 2px solid #1a1a1a;
+}
+
+.imgui-slider::-moz-range-thumb {
+    width: 14px;
+    height: 14px;
+    background: #60d0ff;
+    cursor: pointer;
+    border-radius: 50%;
+    border: 2px solid #1a1a1a;
+}
+
+.imgui-slider:hover::-webkit-slider-thumb {
+    background: #80e0ff;
+}
+
+.imgui-slider:hover::-moz-range-thumb {
+    background: #80e0ff;
+}
+
+.imgui-stats {
+    display: flex;
+    justify-content: space-between;
+    padding: 8px 10px;
+    background: rgba(50, 50, 50, 0.6);
+    border-radius: 3px;
+    margin-bottom: 10px;
+}
+
+.imgui-stat-item {
+    text-align: center;
+}
+
+.imgui-stat-label {
+    font-size: 10px;
+    color: #888;
+    text-transform: uppercase;
+    letter-spacing: 0.5px;
+}
+
+.imgui-stat-value {
+    font-size: 18px;
+    font-weight: bold;
+    color: #60d0ff;
+    margin-top: 2px;
+}
+
+.imgui-stat-value.fps-good {
+    color: #4caf50;
+}
+
+.imgui-stat-value.fps-medium {
+    color: #ff9800;
+}
+
+.imgui-stat-value.fps-bad {
+    color: #f44336;
+}
+
+.imgui-button {
+    width: 100%;
+    padding: 8px;
+    background: rgba(70, 70, 70, 0.8);
+    border: 1px solid rgba(100, 100, 100, 0.5);
+    border-radius: 3px;
+    color: #e0e0e0;
+    cursor: pointer;
+    font-size: 12px;
+    font-weight: bold;
+    transition: background 0.2s;
+}
+
+.imgui-button:hover {
+    background: rgba(90, 90, 90, 0.9);
+    border-color: #60d0ff;
+}
+
+.imgui-button:active {
+    background: rgba(50, 50, 50, 0.9);
+}
+
+.imgui-select {
+    width: 100%;
+    padding: 6px;
+    background: rgba(50, 50, 50, 0.8);
+    border: 1px solid rgba(100, 100, 100, 0.5);
+    border-radius: 3px;
+    color: #e0e0e0;
+    font-size: 12px;
+    cursor: pointer;
+}
+
+.imgui-select:focus {
+    outline: none;
+    border-color: #60d0ff;
+}
+
+.imgui-checkbox {
+    margin-right: 8px;
+    cursor: pointer;
+}
+
+.imgui-checkbox-label {
+    cursor: pointer;
+    user-select: none;
+}
+
+.imgui-toggle {
+    float: right;
+}
