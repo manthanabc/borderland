@@ -4,7 +4,7 @@
 why not
 
 # Todo
-[ ] Add imgui based fps counter
+[ ] Add imgui based fps counter \
 [ ] Add option to load obj
 
 ## how
