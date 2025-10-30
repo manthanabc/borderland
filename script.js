@@ -3,6 +3,9 @@
 import OBJFile from './objparser.js'
 import { ImGui } from './imgui.js'
 
+// Forward declaration to avoid TDZ when referenced before init
+let gui;
+
 let parent = document.getElementById('main');
 let tris = [];
 let counter =0;
@@ -306,7 +309,7 @@ let renderCube = () => {
 renderCube()
 
 // Initialize ImGui
-let gui = new ImGui();
+gui = new ImGui();
 
 // Build UI
 gui.begin('3D Renderer Controls');
@@ -381,4 +384,3 @@ function handleMouseMove(event) {
       // renderCube();
     }
 }
-
