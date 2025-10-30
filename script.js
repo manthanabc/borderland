@@ -1,10 +1,29 @@
 
 
 import OBJFile from './objparser.js'
+import { ImGui } from './imgui.js'
+
+// Forward declaration to avoid TDZ when referenced before init
+let gui;
 
 let parent = document.getElementById('main');
 let tris = [];
 let counter =0;
+
+// Adjustable parameters
+let params = {
+  rotationSpeed: 1.0,
+  scale: 50,
+  fov: 95,
+  cameraZ: 320,
+  cameraY: 195,
+  diffuseIntensity: 2.5,
+  diffuseOffset: 60,
+  specularPower: 10,
+  specularIntensity: 1000,
+  autoRotate: true,
+  model: 'teapot'
+};
 
 class vector {
   constructor(x, y) {
@@ -43,11 +62,11 @@ let convert2d = ([ox, oy, oz]) => {
   let [x, y, z] = rotate([ox, oy, oz])
 
   // Subtract camera cordinates
-  z += 320;
-  y += 195;
+  z += params.cameraZ;
+  y += params.cameraY;
 
   let aspect = 1;
-  let fovRad = 95 * Math.PI /180;
+  let fovRad = params.fov * Math.PI /180;
 
   let far = 1000;
   let near = 10;
@@ -203,8 +222,8 @@ class rendertrig {
     y.style['transform'] = `translateX(-${borderLeft}px) translate(${tg.t1.x-rotx}px, -${ borderBottom/2 }px) rotate(${baseangle}deg) translate(${-tg.t1.x+rotx}px, ${ borderBottom/2 }px)`;
     
     let t = v1.y * v2.z - v2.y * v1.z;
-    let diffuse=(~~(t*2.5))+60;
-    let specular=(Math.pow(((t)+20)/40, 10))*1000;
+    let diffuse=(~~(t*params.diffuseIntensity))+params.diffuseOffset;
+    let specular=(Math.pow(((t)+20)/40, params.specularPower))*params.specularIntensity;
     specular = Math.min(specular, 200)
     y.style['border-color'] = `rgb(${diffuse + ~~specular}, ${~~specular}, ${~~specular})`
   }
@@ -237,47 +256,50 @@ let angle = 10;
 
 let faces = []
 
-let t = await fetch('./teapot.obj')
-let tex = await t.text();
-
-const fileContents =
-  'v 0 0 0 \n' +
-  'v 0 1 0 \n' +
-  'v 1 0 0 \n' +
-  'f 1 2 3';
+// Model loading function
+async function loadModel(modelName) {
+  faces = [];
+  parent.innerHTML = '';
+  counter = 0;
   
-const objFile = new OBJFile(tex);
-const output = objFile.parse(); // see description below
+  let t = await fetch(`./${modelName}.obj`)
+  let tex = await t.text();
+  
+  const objFile = new OBJFile(tex);
+  const output = objFile.parse();
+  
+  let model = output.models[0];
+  let Obj_faces = model.faces;
+  let vertices = model.vertices;
+  
+  console.log(model)
+  console.log(vertices.length)
+  console.log(Obj_faces.length)
+  
+  Obj_faces.forEach((face) => {
+    let tex = vertices[face.vertices[0].vertexIndex -1]
+    let t1 = [tex.x *params.scale , -tex.y *params.scale , tex.z *params.scale ];
+    tex = vertices[face.vertices[1].vertexIndex -1]
+    let t2 = [tex.x *params.scale , -tex.y *params.scale , tex.z *params.scale ];
+    tex = vertices[face.vertices[2].vertexIndex -1]
+    let t3 = [tex.x *params.scale , -tex.y *params.scale , tex.z *params.scale ];
+  
+    faces.push(new rendertrig(
+      t1, t2, t3
+    ))
+  })
+  
+  faces.forEach((trig) => {
+    trig.init();
+  })
+  
+  if (gui) {
+    gui.updateStat('imgui-triangles-value', faces.length);
+  }
+}
 
+await loadModel(params.model)
 
-let model = output.models[0];
-let Obj_faces = model.faces;
-let vertices = model.vertices;
-
-console.log(model)
-// debug()
-
-console.log(vertices.length)
-console.log(Obj_faces.length)
-
-let scale = 50;
-
-Obj_faces.forEach((face) => {
-  let tex = vertices[face.vertices[0].vertexIndex -1]
-  let t1 = [tex.x *scale , -tex.y *scale , tex.z *scale ];
-  tex = vertices[face.vertices[1].vertexIndex -1]
-  let t2 = [tex.x *scale , -tex.y *scale , tex.z *scale ];
-  tex = vertices[face.vertices[2].vertexIndex -1]
-  let t3 = [tex.x *scale , -tex.y *scale , tex.z *scale ];
-
-  faces.push(new rendertrig(
-    t1, t2, t3
-  ))
-})
-
-faces.forEach((trig) => {
-  trig.init();
-})
 let renderCube = () => {
   faces.forEach((trig) => {
     trig.draw();
@@ -286,10 +308,74 @@ let renderCube = () => {
 
 renderCube()
 
+// Initialize ImGui
+gui = new ImGui();
+
+// Build UI
+gui.begin('3D Renderer Controls');
+
+gui.stats([
+  { label: 'FPS', id: 'imgui-fps-value', value: '0' },
+  { label: 'Triangles', id: 'imgui-triangles-value', value: faces.length }
+]);
+
+gui.separator('Rotation');
+gui.checkbox('Auto Rotate', 'auto-rotate', params.autoRotate, (checked) => {
+  params.autoRotate = checked;
+});
+gui.slider('Rotation Speed', 'rotation-speed', params.rotationSpeed, 0.1, 5.0, 0.1, (value) => {
+  params.rotationSpeed = value;
+});
+
+gui.separator('Camera');
+gui.slider('FOV', 'fov', params.fov, 30, 150, 1, (value) => {
+  params.fov = value;
+});
+gui.slider('Camera Z', 'camera-z', params.cameraZ, 100, 600, 10, (value) => {
+  params.cameraZ = value;
+});
+gui.slider('Camera Y', 'camera-y', params.cameraY, -200, 400, 10, (value) => {
+  params.cameraY = value;
+});
+
+gui.separator('Lighting');
+gui.slider('Diffuse Intensity', 'diffuse-intensity', params.diffuseIntensity, 0.5, 10, 0.1, (value) => {
+  params.diffuseIntensity = value;
+});
+gui.slider('Diffuse Offset', 'diffuse-offset', params.diffuseOffset, 0, 150, 5, (value) => {
+  params.diffuseOffset = value;
+});
+gui.slider('Specular Power', 'specular-power', params.specularPower, 1, 50, 1, (value) => {
+  params.specularPower = value;
+});
+gui.slider('Specular Intensity', 'specular-intensity', params.specularIntensity, 0, 3000, 100, (value) => {
+  params.specularIntensity = value;
+});
+
+gui.separator('Model');
+gui.select('Model', 'model-select', [
+  { label: 'Teapot', value: 'teapot' },
+  { label: 'Teddy', value: 'teddy' }
+], params.model, async (value) => {
+  params.model = value;
+  await loadModel(value);
+  renderCube();
+});
+
+gui.button('Reset Rotation', () => {
+  angle = 0;
+});
+
+gui.end();
+
+// Animation loop with adjustable speed
+let animationInterval = 150;
 window.setInterval(() => {
-   angle += 1;
-   renderCube();
-}, 150)
+   if (params.autoRotate) {
+     angle += params.rotationSpeed;
+     renderCube();
+   }
+}, animationInterval)
 
 // document.onmousemove = handleMouseMove;
 function handleMouseMove(event) {
@@ -298,4 +384,3 @@ function handleMouseMove(event) {
       // renderCube();
     }
 }
-
